@@ -29,7 +29,7 @@
     location.replace(NEW + location.search + (hash || ''));
   }
   // 共有リンク（#s=）はそのまま新URLへ引き継ぐ（閲覧モード）
-  if (/[#&]s=/.test(location.hash)) { go(location.hash); return; }
+  if (/[#&](d|s|m)=/.test(location.hash)) { go(location.hash); return; }
 
   // 端末内のサークル・メンバーデータを圧縮して新URLに渡す（新URL側で自動取り込み）
   var raw = null;
