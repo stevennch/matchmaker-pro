@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>ダブルス組み合わせくん Pro – 移転のお知らせ</title>
+<style>
+  body { font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; text-align: center; padding: 48px 16px; color: #1f2933; background: #f4f6f8; }
+  .box { max-width: 480px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; }
+  a { color: #1a7f5a; font-weight: 700; word-break: break-all; }
+  p { line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="box">
+  <p>🎾 アプリは新しいURLに移転しました。自動で移動します…</p>
+  <p>The app has moved. Redirecting… / Ứng dụng đã chuyển sang địa chỉ mới…</p>
+  <p><a id="link" href="https://doubles-matchmaker-pro.web.app/">https://doubles-matchmaker-pro.web.app/</a></p>
+</div>
+<script>
+(function () {
+  var NEW = 'https://doubles-matchmaker-pro.web.app/';
+  var KEY = 'matchmaker_pro_v1'; // 旧URLの端末内データ
+  var done = false;
+  function go(hash) {
+    if (done) return;
+    done = true;
+    location.replace(NEW + location.search + (hash || ''));
+  }
+  // 共有リンク（#s=）はそのまま新URLへ引き継ぐ（閲覧モード）
+  if (/[#&]s=/.test(location.hash)) { go(location.hash); return; }
+
+  // 端末内のサークル・メンバーデータを圧縮して新URLに渡す（新URL側で自動取り込み）
+  var raw = null;
+  try { raw = localStorage.getItem(KEY); } catch (e) { raw = null; }
+  if (!raw || typeof CompressionStream === 'undefined') { go(''); return; }
+  try {
+    var data = new TextEncoder().encode(raw);
+    var stream = new Blob([data]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+    new Response(stream).arrayBuffer().then(function (buf) {
+      var bytes = new Uint8Array(buf), bin = '';
+      for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      var b64u = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      if (b64u.length > 60000) { go(''); return; } // 大きすぎる場合は引き継ぎなしで移動
+      go('#m=z:' + b64u);
+    }).catch(function () { go(''); });
+  } catch (e) { go(''); }
+  setTimeout(function () { go(''); }, 5000); // 念のためのフォールバック
+})();
+</script>
+</body>
+</html>
